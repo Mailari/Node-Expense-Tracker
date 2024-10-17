@@ -9,9 +9,26 @@ dotenv.config({ path: ".env" });
 
 const app = express();
 
+// Allowed origins
+const allowedOrigins = ["https://expense-tracker.mailarigh.com", "http://localhost:3000"];
+
+// CORS options
+const corsOptions = {
+  origin: (origin: string | undefined, callback: (err: Error | null, allow?: boolean) => void) => {
+    // Allow requests with no origin (like mobile apps or curl requests)
+    if (!origin) return callback(null, true);
+    if (allowedOrigins.indexOf(origin) !== -1) {
+      callback(null, true); // Allow if origin is in the allowed list
+    } else {
+      callback(new Error("Not allowed by CORS")); // Deny otherwise
+    }
+  },
+  credentials: true, // Allow cookies or credentials to be sent
+};
+
 // inject global middlewares
 app.use(json());
-app.use(cors());
+app.use(cors(corsOptions));
 
 // inject routes
 app.use("/api", buildRouter());
